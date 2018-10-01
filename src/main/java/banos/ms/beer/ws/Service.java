@@ -1,5 +1,8 @@
 package banos.ms.beer.ws;
 
+import javax.servlet.ServletException;
+import javax.ws.rs.core.Response;
+
 import org.hibernate.Session;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
@@ -64,7 +67,7 @@ public class Service {
 	 * @param item The item instance to save.
 	 * @throws Exception 
 	 */
-	protected static<T> void saveSingleton(T item) throws Exception {
+	protected static<T> void saveSingleton(final T item) throws Exception {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
@@ -83,7 +86,7 @@ public class Service {
 	 * @param item The item instance to save.
 	 * @throws Exception 
 	 */
-	protected static<T> void updateSingleton(T item) throws Exception {
+	protected static<T> void updateSingleton(final T item) throws Exception {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
@@ -94,6 +97,22 @@ public class Service {
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);
+		}
+	}
+	
+	/**
+	 * Create a new database instance.
+	 * @param item The instance to create in the database.
+	 * @return The post response.
+	 * @throws ServletException
+	 */
+	protected static<T> Response create(final T item) throws ServletException {
+		try {
+			saveSingleton(item);
+			
+			return Response.status(Response.Status.CREATED.getStatusCode()).build();
+		} catch (Exception e) {
+			throw new ServletException(e);
 		}
 	}
 	
@@ -109,7 +128,7 @@ public class Service {
 	 * Get a new Hibernate session.
 	 * @return The session.
 	 */
-	private static Session getSession(StandardServiceRegistry registry) {
+	private static Session getSession(final StandardServiceRegistry registry) {
 		return new MetadataSources(registry).buildMetadata().buildSessionFactory().openSession();
 	}
 }

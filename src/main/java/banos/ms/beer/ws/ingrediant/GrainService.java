@@ -31,7 +31,7 @@ public class GrainService extends Service {
 	 * @throws JsonProcessingException
 	 */
 	@GET
-    @Produces("text/plain")
+	@Produces("text/plain")
 	public String getGrains() throws JsonProcessingException {
 		return getListJson(getAllQuery);
 	}
@@ -43,7 +43,7 @@ public class GrainService extends Service {
 	 */
 	@GET
 	@Path("{id : \\d+}")
-    @Produces("text/plain")
+	@Produces("text/plain")
 	public String getGrain(@PathParam("id") String id) throws JsonProcessingException {
 		return getSingletonJson(getSingletonTemplate + id);
 	}
@@ -58,11 +58,7 @@ public class GrainService extends Service {
 	@Consumes(MediaType.TEXT_PLAIN)
 	public Response doPost(final String message) throws ServletException {
 		try {
-			Grain grain = JSONUtils.fromJson(message, Grain.class);
-			
-			saveSingleton(grain);
-			
-			return Response.status(Response.Status.CREATED.getStatusCode()).build();
+			return create(JSONUtils.fromJson(message, Grain.class));
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}

@@ -57,11 +57,15 @@ public class GrainService extends Service {
 	@POST
 	@Consumes(MediaType.TEXT_PLAIN)
 	public Response doPost(final String message) throws ServletException {
+		Grain grain;
+		
 		try {
-			return create(JSONUtils.fromJson(message, Grain.class));
+			grain = JSONUtils.fromJson(message, Grain.class);
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
+		
+		return create(grain);
 	}
 	
 	private static final String getAllQuery = "from Grain ORDER BY name";

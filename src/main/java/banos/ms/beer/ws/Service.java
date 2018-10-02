@@ -1,5 +1,8 @@
 package banos.ms.beer.ws;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.servlet.ServletException;
 import javax.ws.rs.core.Response;
 
@@ -29,23 +32,23 @@ public abstract class Service<T> {
 	
 	/**
 	 * Get the serialized version of a list of objects.
-	 * @param query The query to retrieve the instances.
 	 * @return The serialized objects.
 	 * @throws JsonProcessingException
 	 */
-	protected static String getListJson(final String query) throws JsonProcessingException {
+	protected String getListJson() throws JsonProcessingException {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
+	
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<T> query = builder.createQuery(getEntityClass());
+		query.select(query.from(getEntityClass()));
 		
-		String json;
 		try {
-			json = JSONUtils.toJson(session.createQuery(query).list());
+			return JSONUtils.toJson(session.createQuery(query).getResultList());
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);	
 		}
-		
-		return json;
 	}
 	
 	/**

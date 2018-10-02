@@ -34,7 +34,7 @@ public class GrainService extends Service<Grain> {
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getGrains() throws JsonProcessingException {
-		return getListJson(getAllQuery);
+		return getListJson();
 	}
 	
 	/**
@@ -89,7 +89,4 @@ public class GrainService extends Service<Grain> {
 	protected Class<Grain> getEntityClass() {
 		return Grain.class;
 	}
-	
-	// TODO: make this agnostic to Hibernate
-	private static final String getAllQuery = "from Grain ORDER BY name";
 }

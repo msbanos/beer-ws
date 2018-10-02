@@ -79,7 +79,7 @@ public class GrainService extends Service<Grain> {
 	@DELETE
 	@Path("{id : \\d+}")
 	public Response delete(@PathParam("id") int id) throws NumberFormatException, ServletException {
-		return delete(Integer.valueOf(id));
+		return delete(id);
 	}
 	
 	/**

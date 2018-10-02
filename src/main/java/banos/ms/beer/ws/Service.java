@@ -50,17 +50,17 @@ public abstract class Service<T> {
 	
 	/**
 	 * Get the serialized version of a single object.
-	 * @param query The query to retrieve an instance.
+	 * @param id The id  of the instance to retrieve.
 	 * @return The serialized object.
 	 * @throws JsonProcessingException
 	 */
-	protected static String getSingletonJson(final String query) throws JsonProcessingException {
+	protected String getSingletonJson(final int id) throws JsonProcessingException {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
 		String json;
 		try {
-			json = JSONUtils.toJson(session.createQuery(query).getSingleResult());
+			json = JSONUtils.toJson(session.find(getEntityClass(), id));
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);

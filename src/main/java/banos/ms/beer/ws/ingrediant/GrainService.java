@@ -45,8 +45,8 @@ public class GrainService extends Service<Grain> {
 	@GET
 	@Path("{id : \\d+}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getGrain(@PathParam("id") String id) throws JsonProcessingException {
-		return getSingletonJson(getSingletonTemplate + id);
+	public String getGrain(@PathParam("id") int id) throws JsonProcessingException {
+		return getSingletonJson(id);
 	}
 	
 	/**
@@ -78,7 +78,7 @@ public class GrainService extends Service<Grain> {
 	 */
 	@DELETE
 	@Path("{id : \\d+}")
-	public Response delete(@PathParam("id") String id) throws NumberFormatException, ServletException {
+	public Response delete(@PathParam("id") int id) throws NumberFormatException, ServletException {
 		return delete(Integer.valueOf(id));
 	}
 	
@@ -92,5 +92,4 @@ public class GrainService extends Service<Grain> {
 	
 	// TODO: make this agnostic to Hibernate
 	private static final String getAllQuery = "from Grain ORDER BY name";
-	private static final String getSingletonTemplate = "from Grain WHERE id = ";
 }

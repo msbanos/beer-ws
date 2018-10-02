@@ -18,8 +18,15 @@ import banos.ms.utils.JSONUtils;
  * [Licensing ]		All works licensed by the Lesser GPL
  * 		@link http://www.gnu.org/licenses/lgpl.html
  * [Summary]		Base web service.
+ * [Type T]			The type the service can handle.
  */
-public class Service {
+public abstract class Service<T> {
+	/**
+	 * Get the entity class.
+	 * @return The entity class.
+	 */
+	protected abstract Class<T> getEntityClass();
+	
 	/**
 	 * Get the serialized version of a list of objects.
 	 * @param query The query to retrieve the instances.
@@ -63,11 +70,51 @@ public class Service {
 	}
 	
 	/**
+	 * Create a new database instance.
+	 * @param item The instance to create in the database.
+	 * @return The POST response.
+	 * @throws ServletException
+	 */
+	protected Response create(final T item) throws ServletException {
+		try {
+			saveSingleton(item);
+			
+			return Response.status(Response.Status.CREATED.getStatusCode()).build();
+		} catch (Exception e) {
+			throw new ServletException(e);
+		}
+	}
+	
+	/**
+	 * Delete a single item from the database.
+	 * @param id The id of the record to delete.
+	 * @return The DELETE call response.
+	 * @throws ServletException
+	 */
+	protected Response delete(final int id) throws ServletException {
+		final StandardServiceRegistry registry = getRegistry();
+		final Session session = getSession(registry);
+		
+		try {
+			session.beginTransaction();
+			session.remove(session.find(getEntityClass(), id));
+			session.getTransaction().commit();
+			
+			return Response.status(Response.Status.OK.getStatusCode()).build();
+		} catch (Exception e) {
+			throw new ServletException(e);
+		} finally {
+			session.close();
+			StandardServiceRegistryBuilder.destroy(registry);
+		}
+	}
+	
+	/**
 	 * Save a single instance.
 	 * @param item The item instance to save.
 	 * @throws Exception 
 	 */
-	protected static<T> void saveSingleton(final T item) throws Exception {
+	private void saveSingleton(final T item) throws Exception {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
@@ -86,7 +133,7 @@ public class Service {
 	 * @param item The item instance to save.
 	 * @throws Exception 
 	 */
-	protected static<T> void updateSingleton(final T item) throws Exception {
+	private void updateSingleton(final T item) throws Exception {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
@@ -97,22 +144,6 @@ public class Service {
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);
-		}
-	}
-	
-	/**
-	 * Create a new database instance.
-	 * @param item The instance to create in the database.
-	 * @return The post response.
-	 * @throws ServletException
-	 */
-	protected static<T> Response create(final T item) throws ServletException {
-		try {
-			saveSingleton(item);
-			
-			return Response.status(Response.Status.CREATED.getStatusCode()).build();
-		} catch (Exception e) {
-			throw new ServletException(e);
 		}
 	}
 	

@@ -2,6 +2,7 @@ package banos.ms.beer.ws.ingrediant;
 
 import javax.servlet.ServletException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -24,14 +25,14 @@ import banos.ms.utils.JSONUtils;
  * [Summary]		Service layer to access list of grains.
  */
 @Path("/grains")
-public class GrainService extends Service {
+public class GrainService extends Service<Grain> {
 	/**
 	 * GET call handler to retrieve list of all grains.
 	 * @return The serialized grain list.
 	 * @throws JsonProcessingException
 	 */
 	@GET
-	@Produces("text/plain")
+	@Produces(MediaType.TEXT_PLAIN)
 	public String getGrains() throws JsonProcessingException {
 		return getListJson(getAllQuery);
 	}
@@ -43,7 +44,7 @@ public class GrainService extends Service {
 	 */
 	@GET
 	@Path("{id : \\d+}")
-	@Produces("text/plain")
+	@Produces(MediaType.TEXT_PLAIN)
 	public String getGrain(@PathParam("id") String id) throws JsonProcessingException {
 		return getSingletonJson(getSingletonTemplate + id);
 	}
@@ -68,6 +69,28 @@ public class GrainService extends Service {
 		return create(grain);
 	}
 	
+	/**
+	 * Delete a grain.
+	 * @param id The id of the grain to delete.
+	 * @return The status response.
+	 * @throws ServletException 
+	 * @throws NumberFormatException 
+	 */
+	@DELETE
+	@Path("{id : \\d+}")
+	public Response delete(@PathParam("id") String id) throws NumberFormatException, ServletException {
+		return delete(Integer.valueOf(id));
+	}
+	
+	/**
+	 * Get the entity class.
+	 * @return The entity class.
+	 */
+	protected Class<Grain> getEntityClass() {
+		return Grain.class;
+	}
+	
+	// TODO: make this agnostic to Hibernate
 	private static final String getAllQuery = "from Grain ORDER BY name";
 	private static final String getSingletonTemplate = "from Grain WHERE id = ";
 }

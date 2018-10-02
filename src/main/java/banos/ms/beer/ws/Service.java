@@ -2,8 +2,15 @@ package banos.ms.beer.ws;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 import javax.servlet.ServletException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
@@ -31,11 +38,13 @@ public abstract class Service<T> {
 	protected abstract Class<T> getEntityClass();
 	
 	/**
-	 * Get the serialized version of a list of objects.
-	 * @return The serialized objects.
+	 * GET call handler to retrieve list of all items.
+	 * @return The serialized item list.
 	 * @throws JsonProcessingException
 	 */
-	protected String getListJson() throws JsonProcessingException {
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getAll() throws JsonProcessingException {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 	
@@ -50,36 +59,39 @@ public abstract class Service<T> {
 			StandardServiceRegistryBuilder.destroy(registry);	
 		}
 	}
-	
 	/**
-	 * Get the serialized version of a single object.
-	 * @param id The id  of the instance to retrieve.
-	 * @return The serialized object.
+	 * GET call handler to retrieve an individual item.
+	 * @param id The id of the item to retrieve.
+	 * @return The serialized item.
 	 * @throws JsonProcessingException
 	 */
-	protected String getSingletonJson(final int id) throws JsonProcessingException {
+	@GET
+	@Path("{id : \\d+}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getSingleton(@PathParam("id") int id) throws JsonProcessingException {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
-		String json;
 		try {
-			json = JSONUtils.toJson(session.find(getEntityClass(), id));
+			return JSONUtils.toJson(session.find(getEntityClass(), id));
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);
 		}
-		
-		return json;
 	}
 	
 	/**
-	 * Create a new database instance.
-	 * @param item The instance to create in the database.
-	 * @return The POST response.
-	 * @throws ServletException
+	 * Post request handler.
+	 * @param message The form values.
+	 * @return The post response. 
+	 * @throws ServletException 
 	 */
-	protected Response create(final T item) throws ServletException {
+	@POST
+	@Consumes(MediaType.TEXT_PLAIN)
+	public Response post(final String message) throws ServletException {
 		try {
+			T item = JSONUtils.fromJson(message, getEntityClass());
+			
 			saveSingleton(item);
 			
 			return Response.status(Response.Status.CREATED.getStatusCode()).build();
@@ -89,12 +101,15 @@ public abstract class Service<T> {
 	}
 	
 	/**
-	 * Delete a single item from the database.
-	 * @param id The id of the record to delete.
-	 * @return The DELETE call response.
-	 * @throws ServletException
+	 * Delete an item.
+	 * @param id The id of the item to delete.
+	 * @return The status response.
+	 * @throws ServletException 
+	 * @throws NumberFormatException 
 	 */
-	protected Response delete(final int id) throws ServletException {
+	@DELETE
+	@Path("{id : \\d+}")
+	public Response delete(@PathParam("id") int id) throws NumberFormatException, ServletException {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		

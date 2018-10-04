@@ -7,6 +7,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -31,12 +32,6 @@ import banos.ms.utils.JSONUtils;
  * [Type T]			The type the service can handle.
  */
 public abstract class Service<T> {
-	/**
-	 * Get the entity class.
-	 * @return The entity class.
-	 */
-	protected abstract Class<T> getEntityClass();
-	
 	/**
 	 * GET call handler to retrieve list of all items.
 	 * @return The serialized item list.
@@ -136,23 +131,38 @@ public abstract class Service<T> {
 	}
 	
 	/**
-	 * Update a single instance.
-	 * @param item The item instance to save.
+	 * Update an item.
+	 * @param message The serialized item instance to update.
 	 * @throws Exception 
 	 */
-	private void updateSingleton(final T item) throws Exception {
+	@PUT
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Path("{id : \\d+}")
+	public Response put(final String message) throws ServletException {
 		final StandardServiceRegistry registry = getRegistry();
 		final Session session = getSession(registry);
 		
 		try {
+			T item = JSONUtils.fromJson(message, getEntityClass());
+			
 			session.beginTransaction();
 			session.update(item);
 			session.getTransaction().commit();
+			
+			return Response.status(Response.Status.OK.getStatusCode()).build();
+		} catch (Exception e) {
+			throw new ServletException(e);
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);
 		}
 	}
+	
+	/**
+	 * Get the entity class.
+	 * @return The entity class.
+	 */
+	protected abstract Class<T> getEntityClass();
 	
 	/**
 	 * Get a new service registry instance.

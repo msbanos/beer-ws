@@ -89,14 +89,22 @@ public abstract class Service<T> {
 	@POST
 	@Consumes(MediaType.TEXT_PLAIN)
 	public Response post(final String message) throws ServletException {
+		final StandardServiceRegistry registry = getRegistry();
+		final Session session = getSession(registry);
+		
 		try {
-			T item = JSONUtils.fromJson(message, getEntityClass());
-			
-			saveSingleton(item);
+			final T item = JSONUtils.fromJson(message, getEntityClass());
+				
+			session.beginTransaction();
+			session.save(item);
+			session.getTransaction().commit();
 			
 			return Response.status(Response.Status.CREATED.getStatusCode()).build();
 		} catch (Exception e) {
 			throw new ServletException(e);
+		} finally {
+			session.close();
+			StandardServiceRegistryBuilder.destroy(registry);
 		}
 	}
 	
@@ -121,25 +129,6 @@ public abstract class Service<T> {
 			return Response.status(Response.Status.OK.getStatusCode()).build();
 		} catch (Exception e) {
 			throw new ServletException(e);
-		} finally {
-			session.close();
-			StandardServiceRegistryBuilder.destroy(registry);
-		}
-	}
-	
-	/**
-	 * Save a single instance.
-	 * @param item The item instance to save.
-	 * @throws Exception 
-	 */
-	private void saveSingleton(final T item) throws Exception {
-		final StandardServiceRegistry registry = getRegistry();
-		final Session session = getSession(registry);
-		
-		try {
-			session.beginTransaction();
-			session.save(item);
-			session.getTransaction().commit();
 		} finally {
 			session.close();
 			StandardServiceRegistryBuilder.destroy(registry);

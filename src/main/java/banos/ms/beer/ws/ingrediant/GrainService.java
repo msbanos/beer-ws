@@ -18,6 +18,7 @@ public class GrainService extends Service<Grain> {
 	 * Get the entity class.
 	 * @return The entity class.
 	 */
+	@Override
 	protected Class<Grain> getEntityClass() {
 		return Grain.class;
 	}

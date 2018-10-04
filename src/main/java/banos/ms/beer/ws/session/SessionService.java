@@ -18,6 +18,7 @@ public class SessionService extends Service<BrewSession> {
 	 * Get the entity class.
 	 * @return The entity class.
 	 */
+	@Override
 	protected Class<BrewSession> getEntityClass() {
 		return BrewSession.class;
 	}

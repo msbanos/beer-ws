@@ -18,6 +18,7 @@ public class HopService extends Service<Hop> {
 	 * Get the entity class.
 	 * @return The entity class.
 	 */
+	@Override
 	protected Class<Hop> getEntityClass() {
 		return Hop.class;
 	}

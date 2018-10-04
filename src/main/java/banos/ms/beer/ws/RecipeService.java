@@ -17,6 +17,7 @@ public class RecipeService extends Service<Recipe> {
 	 * Get the entity class.
 	 * @return The entity class.
 	 */
+	@Override
 	protected Class<Recipe> getEntityClass() {
 		return Recipe.class;
 	}

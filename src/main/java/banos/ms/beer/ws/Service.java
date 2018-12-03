@@ -54,6 +54,7 @@ public abstract class Service<T> {
 			StandardServiceRegistryBuilder.destroy(registry);	
 		}
 	}
+	
 	/**
 	 * GET call handler to retrieve an individual item.
 	 * @param id The id of the item to retrieve.
@@ -168,7 +169,7 @@ public abstract class Service<T> {
 	 * Get a new service registry instance.
 	 * @return The registry.
 	 */
-	private static StandardServiceRegistry getRegistry() {
+	protected static StandardServiceRegistry getRegistry() {
 		return new StandardServiceRegistryBuilder().configure().build();
 	}
 	
@@ -176,7 +177,7 @@ public abstract class Service<T> {
 	 * Get a new Hibernate session.
 	 * @return The session.
 	 */
-	private static Session getSession(final StandardServiceRegistry registry) {
+	protected static Session getSession(final StandardServiceRegistry registry) {
 		return new MetadataSources(registry).buildMetadata().buildSessionFactory().openSession();
 	}
 }
